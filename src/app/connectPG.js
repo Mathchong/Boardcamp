@@ -16,8 +16,6 @@ export default async function connectDB() {
     return chachedDB;
   }
 
-  console.log(process.env.DB_URL)
-
   if (process.env.DB_URL) {
     connectionParams = {
       connectionString: process.env.DB_URL
