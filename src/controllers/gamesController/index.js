@@ -5,11 +5,11 @@ export default class GamesController {
     async getGames(req, res) {
         try {
             const db = await connectDB();
-
             const queryName = req.query.name ? `${req.query.name}%` : `%`
+
             const games = await db.query(`SELECT games.*, categories.name as "categoryName" FROM games
-                                    JOIN categories ON categories.id = games."categoryId"
-                                    WHERE games.name LIKE $1`, [queryName])
+                            JOIN categories ON categories.id = games."categoryId"
+                            WHERE games.name LIKE $1`, [queryName])
 
             res.status(200).send(games.rows)
         } catch (error) {
