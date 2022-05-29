@@ -10,6 +10,6 @@ const customersController = new CustomersController()
 customerRoute.get('/', customersController.getCustomers)
 customerRoute.get('/:id', validateUserId, customersController.getCustomerById)
 customerRoute.post('/', createCustomerValidation, customersController.registerCustomer)
-customerRoute.put('/:id', customersController.updateCustomer)
+customerRoute.put('/:id', validateUserId, createCustomerValidation, customersController.updateCustomer)
 
 export default customerRoute
