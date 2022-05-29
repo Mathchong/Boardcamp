@@ -66,7 +66,7 @@ export default class CustomersController {
 
             return res.sendStatus(200)
         } catch (error) {
-
+            return res.status(400).json({message: "error during update", error})
         }
     }
 }
