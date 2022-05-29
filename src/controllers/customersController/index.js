@@ -31,7 +31,25 @@ export default class CustomersController {
     }
 
     async registerCustomer(req, res) {
-        res.status(200).json({ message: 'register a new Customer' })
+        try {
+            const db = await connectDB()
+            console.log('Connected')
+            const { name, phone, cpf, birthday } = req.body
+            console.log('destructured')
+
+            const existingCpf = await db.query(`SELECT * from customers WHERE cpf = $1`, [cpf])
+            console.log(`consulted existing cpf $1`,[existingCpf])
+            if (existingCpf.rowCount) return res.status(409).json({ message: "already have a customer with this CPF", status: 409 })
+            console.log('checked if did exists')
+
+            await db.query(`INSERT INTO customers (name, phone, cpf, birthday) 
+                            VALUES ($1, $2, $3, $4)`, [name, phone, cpf, birthday])
+            console.log('saved')
+
+            return res.sendStatus(201)
+        } catch (error) {
+            return res.status(400).json({ message: 'Error while registering customer' , error: error })
+        }
     }
 
     async updateCustomer(req, res) {
