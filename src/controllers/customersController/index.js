@@ -8,7 +8,7 @@ export default class CustomersController {
 
             const customers = await db.query(`SELECT * FROM customers     
                                               WHERE cpf LIKE $1`, [queryCpf])
-
+            console.log(customers.rows)
             return res.status(200).send(customers.rows)
         } catch (error) {
             res.status(400).json({ message: 'Error while getting customers' })
