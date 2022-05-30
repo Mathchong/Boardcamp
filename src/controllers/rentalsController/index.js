@@ -1,4 +1,5 @@
 import connectDB from "../../app/connectPG.js"
+import dayjs from 'dayjs'
 
 export default class RentalsController {
     async getRents(req, res) {
@@ -11,7 +12,6 @@ export default class RentalsController {
                                       JOIN categories on categories.id = games."categoryId"`)
 
             let allRents = createAllRentsObject(rentals, queryGameId, queryCustomerId);
-            console.log(allRents)
 
             if (!allRents) throw new Error({ message: "Error while creating response" })
 
@@ -23,7 +23,34 @@ export default class RentalsController {
     }
 
     async registerRent(req, res) {
-        res.status(200).json({ message: 'rent a Game' })
+        try {
+            const db = await connectDB()
+
+            const { customerId, gameId, daysRented } = req.body
+
+            const customer = await db.query(`SELECT * FROM customers WHERE id = $1`, [customerId])
+            if (!customer.rowCount) return res.status(404).json({ message: 'Customer not found', status: 404 })
+
+            const game = await db.query(`SELECT * FROM games WHERE id = $1`, [gameId])
+            if (!game.rowCount) return res.status(404).json({ message: 'Game not found', status: 404 })
+
+            const rents = await db.query(`SELECT * FROM rentals where "gameId" = $1`, [gameId])
+            if (rents.rowCount >= game.rows[0].stockTotal) return res.status(400).json({ message: 'There is no avaliable games', status: 400 })
+
+            const rentDate = dayjs().format('DDDD-MM-DD')
+            const originalPrice = daysRented * game.rows[0].pricePerDay
+            const returnDate = null
+            const delayFee = null
+
+            await db.query(`INSERT INTO rentals ("customerId","gameId","rentDate","daysRented","returnDate","originalPrice","delayFee") VALUES
+                            ($1, $2, $3, $4, $5, $6, $7)`, [customerId, gameId, rentDate, daysRented, returnDate, originalPrice, delayFee])
+
+            return res.sendStatus(201)
+
+        } catch (error) {
+            return res.status(400).json({ message: "error while registering rent" })
+        }
+
     }
 
     async closeRent(req, res) {
@@ -36,7 +63,6 @@ export default class RentalsController {
 }
 
 function createAllRentsObject(rentals, gameId, customerId) {
-    console.log(`Game ID:${gameId}, Customer ID:${customerId}`)
     const allRents = rentals.rows.map(rent => {
 
         const object = {
