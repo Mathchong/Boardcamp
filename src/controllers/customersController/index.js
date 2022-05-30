@@ -31,7 +31,7 @@ export default class CustomersController {
             if (!customer.rowCount) return res.status(404).json({ message: 'Customer not found', status: 404 })
 
             console.log(customer.rows)
-            return res.status(200).send(customer.rows)
+            return res.status(200).send(...customer.rows)
 
         } catch (error) {
             res.status(400).json({ message: 'Error while getting customer' })
