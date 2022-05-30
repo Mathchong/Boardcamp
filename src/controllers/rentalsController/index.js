@@ -54,6 +54,13 @@ export default class RentalsController {
     }
 
     async closeRent(req, res) {
+        try {
+            const db = await connectDB()
+
+        } catch (error) {
+
+        }
+
         res.status(200).json({ message: 'return game' })
     }
 
