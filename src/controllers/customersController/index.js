@@ -1,4 +1,5 @@
 import connectDB from "../../app/connectPG.js"
+import dayjs from "dayjs"
 
 export default class CustomersController {
     async getCustomers(req, res) {
@@ -8,8 +9,14 @@ export default class CustomersController {
 
             const customers = await db.query(`SELECT * FROM customers     
                                               WHERE cpf LIKE $1`, [queryCpf])
+            
+            const customersFormated = customers.rows.map(row => {
+                row.birthday = dayjs(row.birthday).format('YYYY-MM-DD')
+                return row
+            })
+            console.log(customersFormated)
             console.log(customers.rows)
-            return res.status(200).send(customers.rows)
+            return res.status(200).send(customersFormated)
         } catch (error) {
             res.status(400).json({ message: 'Error while getting customers' })
         }
