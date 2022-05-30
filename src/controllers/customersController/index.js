@@ -14,8 +14,7 @@ export default class CustomersController {
                 row.birthday = dayjs(row.birthday).format('YYYY-MM-DD')
                 return row
             })
-            console.log(customersFormated)
-            console.log(customers.rows)
+            
             return res.status(200).send(customersFormated)
         } catch (error) {
             res.status(400).json({ message: 'Error while getting customers' })
@@ -30,7 +29,6 @@ export default class CustomersController {
 
             if (!customer.rowCount) return res.status(404).json({ message: 'Customer not found', status: 404 })
 
-            console.log(customer.rows)
             return res.status(200).send(...customer.rows)
 
         } catch (error) {
@@ -42,7 +40,6 @@ export default class CustomersController {
         try {
             const db = await connectDB()
             const { name, phone, cpf, birthday } = req.body
-            console.log(req.body.birthday)
 
             const existingCpf = await db.query(`SELECT * from customers WHERE cpf = $1`, [cpf])
             if (existingCpf.rowCount) return res.status(409).json({ message: "already have a customer with this CPF", status: 409 })
