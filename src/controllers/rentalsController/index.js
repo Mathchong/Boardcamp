@@ -40,7 +40,7 @@ export default class RentalsController {
 
             if (openRents.length >= game.rows[0].stockTotal) return res.status(400).json({ message: 'There is no avaliable games', status: 400 })
 
-            const rentDate = dayjs().format('DDDD-MM-DD')
+            const rentDate = dayjs().format('YYYY-MM-DD')
             const originalPrice = daysRented * game.rows[0].pricePerDay
             const returnDate = null
             const delayFee = null

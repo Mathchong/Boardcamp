@@ -35,6 +35,7 @@ export default class CustomersController {
         try {
             const db = await connectDB()
             const { name, phone, cpf, birthday } = req.body
+            console.log(req.body.birthday)
 
             const existingCpf = await db.query(`SELECT * from customers WHERE cpf = $1`, [cpf])
             if (existingCpf.rowCount) return res.status(409).json({ message: "already have a customer with this CPF", status: 409 })
