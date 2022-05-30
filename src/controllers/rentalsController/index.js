@@ -35,7 +35,10 @@ export default class RentalsController {
             if (!game.rowCount) return res.status(404).json({ message: 'Game not found', status: 404 })
 
             const rents = await db.query(`SELECT * FROM rentals where "gameId" = $1`, [gameId])
-            if (rents.rowCount >= game.rows[0].stockTotal) return res.status(400).json({ message: 'There is no avaliable games', status: 400 })
+            
+            const openRents = rents.rows.filter(row=>!row.returnDate)
+
+            if (openRents.length >= game.rows[0].stockTotal) return res.status(400).json({ message: 'There is no avaliable games', status: 400 })
 
             const rentDate = dayjs().format('DDDD-MM-DD')
             const originalPrice = daysRented * game.rows[0].pricePerDay
