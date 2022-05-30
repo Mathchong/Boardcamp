@@ -35,8 +35,8 @@ export default class RentalsController {
             if (!game.rowCount) return res.status(404).json({ message: 'Game not found', status: 404 })
 
             const rents = await db.query(`SELECT * FROM rentals where "gameId" = $1`, [gameId])
-            
-            const openRents = rents.rows.filter(row=>!row.returnDate)
+
+            const openRents = rents.rows.filter(row => !row.returnDate)
 
             if (openRents.length >= game.rows[0].stockTotal) return res.status(400).json({ message: 'There is no avaliable games', status: 400 })
 
@@ -63,7 +63,7 @@ export default class RentalsController {
             const rent = await db.query(`SELECT * FROM rentals WHERE id = $1 `, [rentId])
 
             if (!rent.rowCount) return res.status(404).json({ message: 'rental not found' })
-            
+
             let { id, customerId, gameId, rentDate, daysRented, returnDate, originalPrice, delayFee } = rent.rows[0]
 
             if (returnDate) return res.status(400).json({ message: "rental already returned" })
@@ -89,7 +89,22 @@ export default class RentalsController {
     }
 
     async deleteRent(req, res) {
-        res.status(200).json({ message: 'delete Rent' })
+        try {
+            const db = await connectDB()
+            const rentId = res.locals.id
+
+            const rental = await db.query(`SELECT * FROM rentals WHERE id = $1`,[rentId])
+            if(!rental.rowCount) return res.status(404).json({ message: "rental not found", status: 404 })
+
+            if(rental.rows[0].returnDate) return res.status(400).json({ message: "rental returned", status:400})
+
+            await db.query(`DELETE FROM rentals WHERE id = $1`, [rentId])
+
+        } catch (error) {
+            res.sendStatus(400)
+        }
+
+
     }
 }
 
