@@ -56,12 +56,33 @@ export default class RentalsController {
     async closeRent(req, res) {
         try {
             const db = await connectDB()
+            const rentId = res.locals.id
+            const rent = await db.query(`SELECT * FROM rentals WHERE id = $1 `, [rentId])
+
+            if (!rent.rowCount) return res.status(404).json({ message: 'rental not found' })
+            
+            let { id, customerId, gameId, rentDate, daysRented, returnDate, originalPrice, delayFee } = rent.rows[0]
+
+            if (returnDate) return res.status(400).json({ message: "rental already returned" })
+
+            returnDate = dayjs()
+            const toBeReturnedAt = dayjs(rentDate).add(daysRented, 'day').format('YYYY-MM-DD')
+            const timeInterval = returnDate.diff(toBeReturnedAt, 'day')
+
+            if (timeInterval > 0) {
+
+                const pricePerDay = originalPrice / daysRented
+                delayFee = timeInterval * pricePerDay
+
+            } else delayFee = 0
+
+            await db.query(`UPDATE rentals SET "returnDate"=$1, "delayFee"=$2 WHERE id = $3 `, [returnDate, delayFee, id])
+
+            return res.status(200).json({ message: "rental returned", status: 200 })
 
         } catch (error) {
-
+            return res.status(400).json({ message: "error while closing rental", status: 400 })
         }
-
-        res.status(200).json({ message: 'return game' })
     }
 
     async deleteRent(req, res) {
